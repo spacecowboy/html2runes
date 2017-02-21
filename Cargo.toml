@@ -1,0 +1,6 @@
+[package]
+name = "html2textrs"
+version = "0.1.0"
+authors = ["Jonas Kalderstam <jonas@kalderstam.se>"]
+
+[dependencies]
