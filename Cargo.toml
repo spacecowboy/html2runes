@@ -1,6 +1,14 @@
 [package]
-name = "html2textrs"
+name = "html2runes"
 version = "0.1.0"
-authors = ["Jonas Kalderstam <jonas@kalderstam.se>"]
+authors = ["Jonas Kalderstam <jonas@cowboyprogrammer.org>"]
 
 [dependencies]
+clap = "~2.20.5"
+html5ever = "~0.13.0"
+html5ever-atoms = "~0.2.0"
+tendril = "~0.2.3"
+
+[[bin]]
+path = "src/main.rs"
+name = "main"
