@@ -1,7 +1,7 @@
 extern crate clap;
 extern crate html2runes;
 
-use clap::{Arg, App};
+use clap::App;
 
 use html2runes::parse::convert_stdin;
 
