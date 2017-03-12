@@ -11,4 +11,4 @@ tendril = "~0.2.3"
 
 [[bin]]
 path = "src/main.rs"
-name = "main"
+name = "html2runes"

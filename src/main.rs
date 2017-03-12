@@ -16,5 +16,6 @@ fn main() {
         //    .help("display the program's version and exit"))
         .get_matches();
 
-    convert_stdin();
+    let result = convert_stdin();
+    println!("{}", result)
 }
