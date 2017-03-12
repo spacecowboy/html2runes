@@ -1,4 +1,4 @@
-use html5ever::rcdom::{NodeEnum, Document, Doctype, Text, Comment, Element, RcDom, Handle};
+use html5ever::rcdom::{Document, Doctype, Text, Comment, Element, Handle};
 use html5ever_atoms::QualName;
 use html5ever::Attribute;
 use tendril::Tendril;
@@ -85,7 +85,7 @@ fn element_start(name: &QualName,
         "p" | "div" => ensure_double_newline(buf),
         "blockquote" => blockquote_start(buf, prefix),
         "br" => ensure_newline(buf),
-        "a" => link_start(buf, attrs),
+        "a" => link_start(buf),
         "img" => img_start(buf, attrs),
         _ => {}
     }
@@ -150,7 +150,7 @@ fn blockquote_end(buf: &mut String, prefix: &mut LinkedList<&str>) {
     ensure_newline(buf)
 }
 
-fn link_start(buf: &mut String, attrs: &Vec<Attribute>) {
+fn link_start(buf: &mut String) {
     buf.push_str("[")
 }
 
