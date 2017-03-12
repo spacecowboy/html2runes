@@ -1,5 +1,5 @@
-use std::collections::LinkedList;
+use html5ever::rcdom::Handle;
 
 pub trait HtmlConverter {
-    fn convert_html_into_buffer(&self, buf: &mut String, prefix: &mut LinkedList<&str>);
+    fn convert_html(&mut self, handle: Handle) -> String;
 }

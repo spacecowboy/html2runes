@@ -9,35 +9,52 @@ use std::collections::LinkedList;
 use traits::HtmlConverter;
 
 pub fn convert_html(handle: Handle) -> String {
-    let mut result = String::new();
-    let mut prefix: LinkedList<&str> = LinkedList::new();
-    handle.convert_html_into_buffer(&mut result, &mut prefix);
-    result
+    let mut converter = MarkdownConverter::new();
+    converter.convert_html(handle)
 }
 
-impl HtmlConverter for Handle {
-    fn convert_html_into_buffer(&self, mut buf: &mut String, prefix: &mut LinkedList<&str>) {
-        let node = self.borrow();
+pub struct MarkdownConverter<'a> {
+    buf: String,
+    prefix: LinkedList<&'a str>,
+}
+
+impl<'a> MarkdownConverter<'a> {
+    pub fn new() -> MarkdownConverter<'a> {
+        MarkdownConverter {
+            buf: String::new(),
+            prefix: LinkedList::new(),
+        }
+    }
+
+    fn convert_html_into_buffer(&mut self, handle: &Handle) {
+        let node = handle.borrow();
         match node.node {
             Comment(_) => {}
             Doctype(_, _, _) => {}
-            Text(ref text) => convert_text(text, buf, prefix),
+            Text(ref text) => convert_text(text, &mut self.buf, &mut self.prefix),
             Element(ref name, _, ref attrs) => {
                 // start element
-                element_start(&name, &attrs, buf, prefix);
+                element_start(&name, &attrs, &mut self.buf, &mut self.prefix);
                 // do contents
                 for child in node.children.iter() {
-                    child.convert_html_into_buffer(buf, prefix);
+                    self.convert_html_into_buffer(&child);
                 }
                 // end element
-                element_end(&name, &attrs, buf, prefix);
+                element_end(&name, &attrs, &mut self.buf, &mut self.prefix);
             }
             Document => {
                 for child in node.children.iter() {
-                    child.convert_html_into_buffer(buf, prefix);
+                    self.convert_html_into_buffer(&child);
                 }
             }
         }
+    }
+}
+
+impl<'a> HtmlConverter for MarkdownConverter<'a> {
+    fn convert_html(&mut self, handle: Handle) -> String {
+        self.convert_html_into_buffer(&handle);
+        self.buf.clone()
     }
 }
 
