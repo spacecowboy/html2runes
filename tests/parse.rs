@@ -108,3 +108,22 @@ fn image() {
     let result = convert_string("here is an <img alt=\"image\" src=\"bla.png\">");
     assert_eq!("here is an ![image](bla.png)", result);
 }
+
+#[test]
+fn ignoring_styles() {
+    let result = convert_string("should ignore style tag<style>I AM STYLE</style>");
+    assert_eq!("should ignore style tag", result);
+}
+
+#[test]
+fn ignoring_scripts() {
+    let result = convert_string("should ignore script tag<script>I AM SCRIPT</script>");
+    assert_eq!("should ignore script tag", result);
+}
+
+#[test]
+fn ignoring_head() {
+    let result = convert_string("<html><head><title>I AM HEAD</title></head><body>should ignore \
+                                 head tag</body></html>");
+    assert_eq!("should ignore head tag", result);
+}

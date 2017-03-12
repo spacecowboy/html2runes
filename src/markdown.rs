@@ -1,9 +1,10 @@
-use html5ever::rcdom::{Document, Doctype, Text, Comment, Element, Handle};
+use html5ever::rcdom::{Document, Doctype, Text, Comment, Element, Handle, Node};
 use html5ever_atoms::QualName;
 use html5ever::Attribute;
 use tendril::Tendril;
 use tendril;
 
+use std::cell::Ref;
 use std::collections::LinkedList;
 
 use traits::HtmlConverter;
@@ -33,6 +34,24 @@ impl<'a> MarkdownConverter<'a> {
             Doctype(_, _, _) => {}
             Text(ref text) => convert_text(text, &mut self.buf, &mut self.prefix),
             Element(ref name, _, ref attrs) => {
+                self.handle_element(&name, &attrs, &node);
+            }
+            Document => {
+                for child in node.children.iter() {
+                    self.convert_html_into_buffer(&child);
+                }
+            }
+        }
+    }
+
+    fn handle_element(&mut self, name: &QualName, attrs: &Vec<Attribute>, node: &Ref<Node>) {
+        let name: &str = &name.local.to_ascii_lowercase().to_lowercase();
+
+        match name {
+            "head" | "style" | "script" => {
+                // ignore these
+            }
+            _ => {
                 // start element
                 element_start(&name, &attrs, &mut self.buf, &mut self.prefix);
                 // do contents
@@ -41,11 +60,6 @@ impl<'a> MarkdownConverter<'a> {
                 }
                 // end element
                 element_end(&name, &attrs, &mut self.buf, &mut self.prefix);
-            }
-            Document => {
-                for child in node.children.iter() {
-                    self.convert_html_into_buffer(&child);
-                }
             }
         }
     }
@@ -90,12 +104,10 @@ fn convert_text(text: &Tendril<tendril::fmt::UTF8>,
     }
 }
 
-fn element_start(name: &QualName,
+fn element_start(name: &str,
                  attrs: &Vec<Attribute>,
                  buf: &mut String,
                  prefix: &mut LinkedList<&str>) {
-    let name: &str = &name.local.to_ascii_lowercase().to_lowercase();
-
     match name {
         "b" | "strong" => bold_start(buf),
         "i" | "em" => emphasize_start(buf),
@@ -108,12 +120,10 @@ fn element_start(name: &QualName,
     }
 }
 
-fn element_end(name: &QualName,
+fn element_end(name: &str,
                attrs: &Vec<Attribute>,
                buf: &mut String,
                prefix: &mut LinkedList<&str>) {
-    let name: &str = &name.local.to_ascii_lowercase().to_lowercase();
-
     match name {
         "b" | "strong" => bold_end(buf),
         "i" | "em" => emphasize_end(buf),
