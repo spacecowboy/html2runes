@@ -96,3 +96,15 @@ and all was good.",
 and all was good.",
                result);
 }
+
+#[test]
+fn link() {
+    let result = convert_string("here is a <a href=\"http://google.com\">link</a> to google");
+    assert_eq!("here is a [link](http://google.com) to google", result);
+}
+
+#[test]
+fn image() {
+    let result = convert_string("here is an <img alt=\"image\" src=\"bla.png\">");
+    assert_eq!("here is an ![image](bla.png)", result);
+}
