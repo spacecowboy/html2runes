@@ -2,9 +2,7 @@ extern crate clap;
 extern crate html2runes;
 
 use clap::{App, Arg};
-
-use html2runes::parse::convert_stdin;
-
+use html2runes::markdown;
 use std::str::FromStr;
 
 enum Format {
@@ -23,7 +21,6 @@ impl FromStr for Format {
 }
 
 fn main() {
-
     let args = App::new("html2textrs")
         .version("0.1")
         .about("Converts html from STDIN to plain text on STDOUT.")
@@ -40,7 +37,7 @@ fn main() {
     let format = format.parse::<Format>().unwrap();
 
     let result = match format {
-        Format::Markdown => convert_stdin(),
+        Format::Markdown => markdown::convert_stdin(),
     };
     println!("{}", result)
 }

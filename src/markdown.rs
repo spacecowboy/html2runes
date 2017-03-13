@@ -8,6 +8,17 @@ use std::cell::Ref;
 use std::collections::LinkedList;
 
 use traits::HtmlConverter;
+use parse::{parse_stdin, parse_string};
+
+pub fn convert_stdin() -> String {
+    let dom = parse_stdin();
+    convert_html(dom.document)
+}
+
+pub fn convert_string(s: &str) -> String {
+    let dom = parse_string(s);
+    convert_html(dom.document)
+}
 
 pub fn convert_html(handle: Handle) -> String {
     let mut converter = MarkdownConverter::new();

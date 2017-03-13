@@ -1,6 +1,6 @@
 extern crate html2runes;
 
-use html2runes::parse::*;
+use html2runes::markdown::*;
 
 #[test]
 fn plaintext() {
