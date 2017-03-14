@@ -23,6 +23,12 @@ fn lines_with_empty_spaces_are_killed() {
 }
 
 #[test]
+fn ending_space_is_trimmed() {
+    let result = convert_string("a b c <br> \n <br>d e f");
+    assert_eq!("a b c\nd e f", result);
+}
+
+#[test]
 fn bold() {
     let result = convert_string("My <b>little</b> car.");
     assert_eq!("My **little** car.", result);

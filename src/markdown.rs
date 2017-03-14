@@ -152,6 +152,13 @@ fn bold_end(buf: &mut String) {
     bold_start(buf)
 }
 
+fn trim_ending_whitespace(buf: &mut String) {
+    while buf.ends_with(" ") || buf.ends_with("\t") {
+        let end = buf.len() - 1;
+        buf.remove(end);
+    }
+}
+
 fn emphasize_start(buf: &mut String) {
     buf.push_str("*")
 }
@@ -161,6 +168,7 @@ fn emphasize_end(buf: &mut String) {
 }
 
 fn ensure_double_newline(buf: &mut String) {
+    trim_ending_whitespace(buf);
     if buf.ends_with("\n\n") {
         // Nothing to do
     } else if buf.ends_with("\n") {
@@ -171,6 +179,7 @@ fn ensure_double_newline(buf: &mut String) {
 }
 
 fn ensure_newline(buf: &mut String) {
+    trim_ending_whitespace(buf);
     if buf.ends_with("\n") {
         // Nothing to do
     } else if !buf.is_empty() {
