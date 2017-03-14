@@ -133,3 +133,50 @@ fn ignoring_head() {
                                  head tag</body></html>");
     assert_eq!("should ignore head tag", result);
 }
+
+#[test]
+fn unordered_list() {
+    let expected = "Here's a list:
+
+* first
+* second
+
+Wasn't it good?";
+    let result = convert_string("Here's a list: <ul><li>first</li><li>second</li></ul> Wasn't it good?");
+    assert_eq!(expected, result);
+
+    let result = convert_string("<p>Here's a list:</p> <ul><li>first</li><li>second</li></ul> <p>Wasn't it good?</p>");
+    assert_eq!(expected, result);
+}
+
+#[test]
+fn unordered_more_complex_list() {
+    let expected = "Here's a list:
+
+* A paragraph
+  with two lines.
+
+  With a blank line in between.
+* second item
+  with three
+  lines
+* as well as
+
+  * a nested
+    list
+  * of two
+
+  and the nested list ended
+
+Wasn't it good?";
+    let result = convert_string("Here's a list: <ul><li><p>A paragraph<br>with two lines.</p>
+<p>With a blank line in between.</p></li>
+<li><br>second item<br>with three\n<br><br>lines</li>
+<li>as well as
+<ul>
+<li>a nested<br>list</li>
+<li><p>of two</p></li></ul>
+and the nested list ended</li>
+</ul> Wasn't it good?");
+    assert_eq!(expected, result);
+}

@@ -28,6 +28,7 @@ pub fn convert_html(handle: Handle) -> String {
 pub struct MarkdownConverter<'a> {
     buf: String,
     prefix: LinkedList<&'a str>,
+    list_markers: Vec<Option<usize>>,
 }
 
 impl<'a> MarkdownConverter<'a> {
@@ -35,6 +36,7 @@ impl<'a> MarkdownConverter<'a> {
         MarkdownConverter {
             buf: String::new(),
             prefix: LinkedList::new(),
+            list_markers: Vec::new(),
         }
     }
 
@@ -64,15 +66,68 @@ impl<'a> MarkdownConverter<'a> {
             }
             _ => {
                 // start element
-                element_start(&name, &attrs, &mut self.buf, &mut self.prefix);
+                self.element_start(&name, &attrs);
                 // do contents
                 for child in node.children.iter() {
                     self.convert_html_into_buffer(&child);
                 }
                 // end element
-                element_end(&name, &attrs, &mut self.buf, &mut self.prefix);
+                self.element_end(&name, &attrs);
             }
         }
+    }
+
+    fn element_start(&mut self,
+                     name: &str,
+                     attrs: &Vec<Attribute>) {
+        match name {
+            "b" | "strong" => bold_start(&mut self.buf),
+            "i" | "em" => emphasize_start(&mut self.buf),
+            "p" | "div" => self.p_start(),
+            "blockquote" => blockquote_start(&mut self.buf, &mut self.prefix),
+            "br" => self.br_start(),
+            "a" => link_start(&mut self.buf),
+            "img" => img_start(&mut self.buf, attrs),
+            "ul" => ul_start(&mut self.buf, &mut self.list_markers),
+            "li" => li_start(&mut self.buf, &mut self.list_markers),
+            _ => {}
+        }
+    }
+
+    fn element_end(&mut self,
+                   name: &str,
+                   attrs: &Vec<Attribute>) {
+        match name {
+            "b" | "strong" => bold_end(&mut self.buf),
+            "i" | "em" => emphasize_end(&mut self.buf),
+            "blockquote" => blockquote_end(&mut self.buf, &mut self.prefix),
+            "a" => link_end(&mut self.buf, attrs),
+            "ul" => ul_end(&mut self.buf, &mut self.list_markers),
+            "li" => {
+                li_end(&mut self.buf, &mut self.list_markers);
+            },
+            _ => {}
+        }
+    }
+
+    fn p_start(&mut self) {
+        if let Some(prefix) = prefix(&self.list_markers) {
+            if self.buf.ends_with(&prefix) {
+                return;
+            }
+        }
+        ensure_double_newline(&mut self.buf);
+        prefix_with_necessary_spaces(&mut self.buf, &self.list_markers);
+    }
+
+    fn br_start(&mut self) {
+        if let Some(prefix) = prefix(&self.list_markers) {
+            if self.buf.ends_with(&prefix) {
+                return;
+            }
+        }
+        ensure_newline(&mut self.buf);
+        prefix_with_necessary_spaces(&mut self.buf, &self.list_markers);
     }
 }
 
@@ -115,41 +170,20 @@ fn convert_text(text: &Tendril<tendril::fmt::UTF8>,
     }
 }
 
-fn element_start(name: &str,
-                 attrs: &Vec<Attribute>,
-                 buf: &mut String,
-                 prefix: &mut LinkedList<&str>) {
-    match name {
-        "b" | "strong" => bold_start(buf),
-        "i" | "em" => emphasize_start(buf),
-        "p" | "div" => ensure_double_newline(buf),
-        "blockquote" => blockquote_start(buf, prefix),
-        "br" => ensure_newline(buf),
-        "a" => link_start(buf),
-        "img" => img_start(buf, attrs),
-        _ => {}
-    }
-}
-
-fn element_end(name: &str,
-               attrs: &Vec<Attribute>,
-               buf: &mut String,
-               prefix: &mut LinkedList<&str>) {
-    match name {
-        "b" | "strong" => bold_end(buf),
-        "i" | "em" => emphasize_end(buf),
-        "blockquote" => blockquote_end(buf, prefix),
-        "a" => link_end(buf, attrs),
-        _ => {}
-    }
-}
-
 fn bold_start(buf: &mut String) {
     buf.push_str("**")
 }
 
 fn bold_end(buf: &mut String) {
     bold_start(buf)
+}
+
+fn emphasize_start(buf: &mut String) {
+    buf.push_str("*")
+}
+
+fn emphasize_end(buf: &mut String) {
+    emphasize_start(buf)
 }
 
 fn trim_ending_whitespace(buf: &mut String) {
@@ -159,12 +193,26 @@ fn trim_ending_whitespace(buf: &mut String) {
     }
 }
 
-fn emphasize_start(buf: &mut String) {
-    buf.push_str("*")
+fn prefix(list_markers: &Vec<Option<usize>>) -> Option<String> {
+    if let Some(mark) = list_markers.last() {
+        match *mark {
+            Some(i) => Some(format!("{}. ", i)),
+            None => Some("* ".to_string()),
+        }
+    } else {
+        None
+    }
 }
 
-fn emphasize_end(buf: &mut String) {
-    emphasize_start(buf)
+fn prefix_with_necessary_spaces(buf: &mut String, list_markers: &[Option<usize>]) {
+    let count = list_markers.iter().fold(0, |sum,mark| {
+        match *mark {
+            Some(_) => sum + 3, // '1. ' = three characters
+            None => sum + 2, // '* ' = two characters
+        }
+    });
+
+    buf.push_str(&(0..count).map(|_| " ").collect::<String>());
 }
 
 fn ensure_double_newline(buf: &mut String) {
@@ -241,4 +289,59 @@ fn img_start(buf: &mut String, attrs: &Vec<Attribute>) {
     buf.push_str("](");
     buf.push_str(src);
     buf.push_str(")")
+}
+
+fn ul_start(buf: &mut String, list_markers: &mut Vec<Option<usize>>) {
+    ensure_double_newline(buf);
+    list_markers.push(None);
+}
+
+fn ul_end(buf: &mut String, list_markers: &mut Vec<Option<usize>>) {
+    ensure_double_newline(buf);
+    list_markers.pop();
+    prefix_with_necessary_spaces(buf, &list_markers);
+}
+
+fn li_start(buf: &mut String, list_markers: &Vec<Option<usize>>) {
+    if !list_markers.is_empty() {
+        let last_index = list_markers.len() - 1;
+        prefix_with_necessary_spaces(buf, list_markers.split_at(last_index).0);
+        if let Some(prefix) = prefix(list_markers) {
+            buf.push_str(&prefix);
+        }
+    }
+}
+
+fn li_end(buf: &mut String, list_markers: &mut Vec<Option<usize>>) {
+    if let Some(mark) = list_markers.pop() {
+        ensure_newline(buf);
+        match mark {
+            Some(i) => list_markers.push(Some(i + 1)),
+            None => list_markers.push(mark),
+        }
+    }
+}
+
+#[test]
+fn test_prefix_with_necessary_spaces() {
+    let mut buf = String::new();
+    prefix_with_necessary_spaces(&mut buf, &[]);
+    assert_eq!("", &buf);
+
+    let mut buf = String::new();
+    prefix_with_necessary_spaces(&mut buf, &[None]);
+    assert_eq!("  ", &buf);
+
+    let mut buf = String::new();
+    prefix_with_necessary_spaces(&mut buf, &[Some(3)]);
+    assert_eq!("   ", &buf);
+
+    let mut buf = String::new();
+    prefix_with_necessary_spaces(&mut buf, &[Some(1), None, Some(2)]);
+    assert_eq!("        ", &buf);
+
+    let mut buf = String::new();
+    prefix_with_necessary_spaces(&mut buf,
+                                 &[Some(1), None, Some(2)].split_at(2).0);
+    assert_eq!("     ", &buf);
 }
