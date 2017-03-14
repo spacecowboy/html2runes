@@ -77,9 +77,7 @@ impl<'a> MarkdownConverter<'a> {
         }
     }
 
-    fn element_start(&mut self,
-                     name: &str,
-                     attrs: &Vec<Attribute>) {
+    fn element_start(&mut self, name: &str, attrs: &Vec<Attribute>) {
         match name {
             "b" | "strong" => bold_start(&mut self.buf),
             "i" | "em" => emphasize_start(&mut self.buf),
@@ -89,23 +87,22 @@ impl<'a> MarkdownConverter<'a> {
             "a" => link_start(&mut self.buf),
             "img" => img_start(&mut self.buf, attrs),
             "ul" => ul_start(&mut self.buf, &mut self.list_markers),
+            "ol" => ol_start(&mut self.buf, &mut self.list_markers),
             "li" => li_start(&mut self.buf, &mut self.list_markers),
             _ => {}
         }
     }
 
-    fn element_end(&mut self,
-                   name: &str,
-                   attrs: &Vec<Attribute>) {
+    fn element_end(&mut self, name: &str, attrs: &Vec<Attribute>) {
         match name {
             "b" | "strong" => bold_end(&mut self.buf),
             "i" | "em" => emphasize_end(&mut self.buf),
             "blockquote" => blockquote_end(&mut self.buf, &mut self.prefix),
             "a" => link_end(&mut self.buf, attrs),
-            "ul" => ul_end(&mut self.buf, &mut self.list_markers),
+            "ul" | "ol" => list_end(&mut self.buf, &mut self.list_markers),
             "li" => {
                 li_end(&mut self.buf, &mut self.list_markers);
-            },
+            }
             _ => {}
         }
     }
@@ -205,7 +202,7 @@ fn prefix(list_markers: &Vec<Option<usize>>) -> Option<String> {
 }
 
 fn prefix_with_necessary_spaces(buf: &mut String, list_markers: &[Option<usize>]) {
-    let count = list_markers.iter().fold(0, |sum,mark| {
+    let count = list_markers.iter().fold(0, |sum, mark| {
         match *mark {
             Some(_) => sum + 3, // '1. ' = three characters
             None => sum + 2, // '* ' = two characters
@@ -296,10 +293,15 @@ fn ul_start(buf: &mut String, list_markers: &mut Vec<Option<usize>>) {
     list_markers.push(None);
 }
 
-fn ul_end(buf: &mut String, list_markers: &mut Vec<Option<usize>>) {
+fn list_end(buf: &mut String, list_markers: &mut Vec<Option<usize>>) {
     ensure_double_newline(buf);
     list_markers.pop();
     prefix_with_necessary_spaces(buf, &list_markers);
+}
+
+fn ol_start(buf: &mut String, list_markers: &mut Vec<Option<usize>>) {
+    ensure_double_newline(buf);
+    list_markers.push(Some(1));
 }
 
 fn li_start(buf: &mut String, list_markers: &Vec<Option<usize>>) {
@@ -341,7 +343,6 @@ fn test_prefix_with_necessary_spaces() {
     assert_eq!("        ", &buf);
 
     let mut buf = String::new();
-    prefix_with_necessary_spaces(&mut buf,
-                                 &[Some(1), None, Some(2)].split_at(2).0);
+    prefix_with_necessary_spaces(&mut buf, &[Some(1), None, Some(2)].split_at(2).0);
     assert_eq!("     ", &buf);
 }
