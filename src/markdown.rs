@@ -209,7 +209,7 @@ fn prefix_with_necessary_spaces(buf: &mut String, list_markers: &[Option<usize>]
         }
     });
 
-    buf.push_str(&(0..count).map(|_| " ").collect::<String>());
+    buf.push_str(&" ".repeat(count));
 }
 
 fn ensure_double_newline(buf: &mut String) {
