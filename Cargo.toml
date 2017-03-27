@@ -16,6 +16,10 @@ html5ever = "~0.13.0"
 html5ever-atoms = "~0.2.0"
 tendril = "~0.2.3"
 
+[badges.travis-ci]
+repository = "spacecowboy/html2runes"
+branch = "master"
+
 [[bin]]
 path = "src/main.rs"
 name = "html2runes"
