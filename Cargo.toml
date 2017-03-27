@@ -1,7 +1,14 @@
 [package]
 name = "html2runes"
-version = "0.1.0"
+version = "1.0.0"
 authors = ["Jonas Kalderstam <jonas@cowboyprogrammer.org>"]
+description = "A HTML to Text converter program written in Rust."
+homepage = "https://github.com/spacecowboy/html2runes"
+repository = "https://github.com/spacecowboy/html2runes"
+readme = "README.md"
+keywords = ["html", "plaintext", "converter", "markdown"]
+categories = ["parsing", "text-processing"]
+license = "MIT"
 
 [dependencies]
 clap = "~2.20.5"
