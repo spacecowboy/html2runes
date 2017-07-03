@@ -153,10 +153,16 @@ fn convert_text(text: &Tendril<tendril::fmt::UTF8>,
     for c in text.chars() {
         match c {
             // Stick to a single space
-            ' ' | '\n' => {
+            ' ' => {
                 if !prev {
                     prev = true;
                     buf.push(' ');
+                }
+            },
+            '\n' => {
+                if !prev {
+                    prev = true;
+                    buf.push('\n');
                 }
             }
             _ => {
