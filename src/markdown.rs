@@ -1,10 +1,6 @@
-use html5ever::rcdom::{Document, Doctype, Text, Comment, Element, Handle, Node};
-use html5ever_atoms::QualName;
-use html5ever::Attribute;
-use tendril::Tendril;
-use tendril;
+use html5ever::rcdom::{Node, NodeData, Handle};
+use html5ever::{Attribute, QualName};
 
-use std::cell::Ref;
 use std::collections::LinkedList;
 
 use traits::HtmlConverter;
@@ -41,23 +37,24 @@ impl<'a> MarkdownConverter<'a> {
     }
 
     fn convert_html_into_buffer(&mut self, handle: &Handle) {
-        let node = handle.borrow();
-        match node.node {
-            Comment(_) => {}
-            Doctype(_, _, _) => {}
-            Text(ref text) => convert_text(text, &mut self.buf, &mut self.prefix),
-            Element(ref name, _, ref attrs) => {
-                self.handle_element(&name, &attrs, &node);
+        let node = handle;
+        match node.data {
+            NodeData::Comment{ .. } => {}
+            NodeData::Doctype{ .. } => {}
+            NodeData::Text{ ref contents } => convert_text(&contents.borrow(), &mut self.buf, &mut self.prefix),
+            NodeData::Element{ ref name, ref attrs, .. } => {
+                self.handle_element(name, &attrs.borrow(), &node);
             }
-            Document => {
-                for child in node.children.iter() {
+            NodeData::Document => {
+                for child in node.children.borrow().iter() {
                     self.convert_html_into_buffer(&child);
                 }
-            }
+            },
+            _ => (),
         }
     }
 
-    fn handle_element(&mut self, name: &QualName, attrs: &Vec<Attribute>, node: &Ref<Node>) {
+    fn handle_element(&mut self, name: &QualName, attrs: &Vec<Attribute>, node: &Node) {
         let name: &str = &name.local.to_ascii_lowercase().to_lowercase();
 
         match name {
@@ -68,7 +65,7 @@ impl<'a> MarkdownConverter<'a> {
                 // start element
                 self.element_start(&name, &attrs);
                 // do contents
-                for child in node.children.iter() {
+                for child in node.children.borrow().iter() {
                     self.convert_html_into_buffer(&child);
                 }
                 // end element
@@ -135,7 +132,7 @@ impl<'a> HtmlConverter for MarkdownConverter<'a> {
     }
 }
 
-fn convert_text(text: &Tendril<tendril::fmt::UTF8>,
+fn convert_text(text: &str,
                 buf: &mut String,
                 prefix: &mut LinkedList<&str>) {
     // Start with prefixes
