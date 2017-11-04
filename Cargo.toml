@@ -1,25 +1,30 @@
 [package]
-name = "html2runes"
-version = "1.0.0"
 authors = ["Jonas Kalderstam <jonas@cowboyprogrammer.org>"]
+categories = [
+    "parsing",
+    "text-processing",
+]
 description = "A HTML to Text converter program written in Rust."
 homepage = "https://github.com/spacecowboy/html2runes"
-repository = "https://github.com/spacecowboy/html2runes"
-readme = "README.md"
-keywords = ["html", "plaintext", "converter", "markdown"]
-categories = ["parsing", "text-processing"]
+keywords = [
+    "html",
+    "plaintext",
+    "converter",
+    "markdown",
+]
 license = "MIT"
-
-[dependencies]
-clap = "~2.20.5"
-html5ever = "~0.13.0"
-html5ever-atoms = "~0.2.0"
-tendril = "~0.2.3"
-
-[badges.travis-ci]
-repository = "spacecowboy/html2runes"
-branch = "master"
+name = "html2runes"
+readme = "README.md"
+repository = "https://github.com/spacecowboy/html2runes"
+version = "1.0.1"
 
 [[bin]]
-path = "src/main.rs"
 name = "html2runes"
+path = "src/main.rs"
+[badges.travis-ci]
+branch = "master"
+repository = "spacecowboy/html2runes"
+
+[dependencies]
+clap = "2.27.1"
+html5ever = "0.21.0"
