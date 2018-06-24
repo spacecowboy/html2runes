@@ -24,12 +24,14 @@ fn main() {
     let args = App::new("html2textrs")
         .version("0.1")
         .about("Converts html from STDIN to plain text on STDOUT.")
-        .arg(Arg::with_name("format")
-            .short("f")
-            .long("format")
-            .help("Plain text format to use")
-            .possible_values(&["markdown"])
-            .default_value("markdown"))
+        .arg(
+            Arg::with_name("format")
+                .short("f")
+                .long("format")
+                .help("Plain text format to use")
+                .possible_values(&["markdown"])
+                .default_value("markdown"),
+        )
         .get_matches();
 
     // Default value exists

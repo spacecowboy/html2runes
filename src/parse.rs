@@ -1,9 +1,9 @@
-use std::io;
 use std::default::Default;
+use std::io;
 
-use tendril::TendrilSink;
 use html5ever::parse_document;
 use html5ever::rcdom::RcDom;
+use tendril::TendrilSink;
 
 /// Read from stdin and parse as HTML/XML
 pub fn parse_stdin() -> RcDom {
