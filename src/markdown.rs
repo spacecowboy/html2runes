@@ -1,14 +1,14 @@
-use html5ever::rcdom::{Document, Doctype, Text, Comment, Element, Handle, Node};
-use html5ever_atoms::QualName;
+use html5ever::rcdom::{Comment, Doctype, Document, Element, Handle, Node, Text};
 use html5ever::Attribute;
-use tendril::Tendril;
+use html5ever_atoms::QualName;
 use tendril;
+use tendril::Tendril;
 
 use std::cell::Ref;
 use std::collections::LinkedList;
 
-use traits::HtmlConverter;
 use parse::{parse_stdin, parse_string};
+use traits::HtmlConverter;
 
 pub fn convert_stdin() -> String {
     let dom = parse_stdin();
@@ -135,9 +135,11 @@ impl<'a> HtmlConverter for MarkdownConverter<'a> {
     }
 }
 
-fn convert_text(text: &Tendril<tendril::fmt::UTF8>,
-                buf: &mut String,
-                prefix: &mut LinkedList<&str>) {
+fn convert_text(
+    text: &Tendril<tendril::fmt::UTF8>,
+    buf: &mut String,
+    prefix: &mut LinkedList<&str>,
+) {
     // Start with prefixes
     for p in prefix.iter() {
         buf.push_str(p);
@@ -205,7 +207,7 @@ fn prefix_with_necessary_spaces(buf: &mut String, list_markers: &[Option<usize>]
     let count = list_markers.iter().fold(0, |sum, mark| {
         match *mark {
             Some(_) => sum + 3, // '1. ' = three characters
-            None => sum + 2, // '* ' = two characters
+            None => sum + 2,    // '* ' = two characters
         }
     });
 

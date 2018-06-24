@@ -10,9 +10,11 @@ fn plaintext() {
 
 #[test]
 fn newlines_are_ignored() {
-    let result = convert_string("My
+    let result = convert_string(
+        "My
 little
-car.");
+car.",
+    );
     assert_eq!("My little car.", result);
 }
 
@@ -51,8 +53,10 @@ fn paragraph() {
     let result = convert_string("<p>A piece of text<br></p><p>Another piece</p>");
     assert_eq!("A piece of text\n\nAnother piece", result);
 
-    let result = convert_string("<p>A piece of text</p>
-<p>Another piece</p>");
+    let result = convert_string(
+        "<p>A piece of text</p>
+<p>Another piece</p>",
+    );
     assert_eq!("A piece of text\n\nAnother piece", result);
 
     let result = convert_string("<p>A piece of text<p>Another piece");
@@ -72,7 +76,6 @@ fn newline() {
 
     let result = convert_string("<br>none");
     assert_eq!("none", result);
-
 }
 
 #[test]
@@ -80,27 +83,39 @@ fn blockquote() {
     let result = convert_string("<blockquote>just a quote</blockquote>");
     assert_eq!("> just a quote\n", result);
 
-    let result = convert_string("<blockquote>a nested<blockquote>quote should give \
-                                 double</blockquote>lines</blockquote>");
-    assert_eq!("> a nested
+    let result = convert_string(
+        "<blockquote>a nested<blockquote>quote should give \
+         double</blockquote>lines</blockquote>",
+    );
+    assert_eq!(
+        "> a nested
 >> quote should give double
 > lines\n",
-               result);
+        result
+    );
 
-    let result = convert_string("<p>And he said:</p><blockquote>Quote me</blockquote>and all was \
-                                 good.");
-    assert_eq!("And he said:
+    let result = convert_string(
+        "<p>And he said:</p><blockquote>Quote me</blockquote>and all was \
+         good.",
+    );
+    assert_eq!(
+        "And he said:
 > Quote me
 and all was good.",
-               result);
+        result
+    );
 
-    let result = convert_string("And he said:<blockquote>A long long piece of text<br>which you \
-                                 can find in the quote</blockquote>and all was good.");
-    assert_eq!("And he said:
+    let result = convert_string(
+        "And he said:<blockquote>A long long piece of text<br>which you \
+         can find in the quote</blockquote>and all was good.",
+    );
+    assert_eq!(
+        "And he said:
 > A long long piece of text
 > which you can find in the quote
 and all was good.",
-               result);
+        result
+    );
 }
 
 #[test]
@@ -129,8 +144,10 @@ fn ignoring_scripts() {
 
 #[test]
 fn ignoring_head() {
-    let result = convert_string("<html><head><title>I AM HEAD</title></head><body>should ignore \
-                                 head tag</body></html>");
+    let result = convert_string(
+        "<html><head><title>I AM HEAD</title></head><body>should ignore \
+         head tag</body></html>",
+    );
     assert_eq!("should ignore head tag", result);
 }
 
@@ -142,12 +159,16 @@ fn unordered_list() {
 * second
 
 Wasn't it good?";
-    let result = convert_string("Here's a list: <ul><li>first</li><li>second</li></ul> Wasn't it \
-                                 good?");
+    let result = convert_string(
+        "Here's a list: <ul><li>first</li><li>second</li></ul> Wasn't it \
+         good?",
+    );
     assert_eq!(expected, result);
 
-    let result = convert_string("<p>Here's a list:</p> <ul><li>first</li><li>second</li></ul> \
-                                 <p>Wasn't it good?</p>");
+    let result = convert_string(
+        "<p>Here's a list:</p> <ul><li>first</li><li>second</li></ul> \
+         <p>Wasn't it good?</p>",
+    );
     assert_eq!(expected, result);
 }
 
@@ -171,7 +192,8 @@ fn unordered_more_complex_list() {
   and the nested list ended
 
 Wasn't it good?";
-    let result = convert_string("Here's a list: <ul><li><p>A paragraph<br>with two lines.</p>
+    let result = convert_string(
+        "Here's a list: <ul><li><p>A paragraph<br>with two lines.</p>
 <p>With a blank line in between.</p></li>
 <li><br>second item<br>with three\n<br><br>lines</li>
 <li>as well as
@@ -179,7 +201,8 @@ Wasn't it good?";
 <li>a nested<br>list</li>
 <li><p>of two</p></li></ul>
 and the nested list ended</li>
-</ul> Wasn't it good?");
+</ul> Wasn't it good?",
+    );
     assert_eq!(expected, result);
 }
 
@@ -191,12 +214,16 @@ fn ordered_list() {
 2. second
 
 Wasn't it good?";
-    let result = convert_string("Here's a list: <ol><li>first</li><li>second</li></ol> Wasn't it \
-                                 good?");
+    let result = convert_string(
+        "Here's a list: <ol><li>first</li><li>second</li></ol> Wasn't it \
+         good?",
+    );
     assert_eq!(expected, result);
 
-    let result = convert_string("<p>Here's a list:</p> <ol><li>first</li><li>second</li></ol> \
-                                 <p>Wasn't it good?</p>");
+    let result = convert_string(
+        "<p>Here's a list:</p> <ol><li>first</li><li>second</li></ol> \
+         <p>Wasn't it good?</p>",
+    );
     assert_eq!(expected, result);
 }
 
@@ -220,7 +247,8 @@ fn ordered_more_complex_list() {
    and the nested list ended
 
 Wasn't it good?";
-    let result = convert_string("Here's a list: <ol><li><p>A paragraph<br>with two lines.</p>
+    let result = convert_string(
+        "Here's a list: <ol><li><p>A paragraph<br>with two lines.</p>
 <p>With a blank line in between.</p></li>
 <li><br>second item<br>with three\n<br><br>lines</li>
 <li>as well as
@@ -228,7 +256,8 @@ Wasn't it good?";
 <li>a nested<br>list</li>
 <li><p>of two</p></li></ol>
 and the nested list ended</li>
-</ol> Wasn't it good?");
+</ol> Wasn't it good?",
+    );
     assert_eq!(expected, result);
 }
 
@@ -254,7 +283,8 @@ fn ordered_and_unordered_mixed() {
 3. But then a third item followed
 
 Wasn't it good?";
-    let result = convert_string("Here's a list:
+    let result = convert_string(
+        "Here's a list:
 <ol>
  <li><p>A paragraph<br>with two lines.</p>
    <p>With a blank line in between.</p></li>
@@ -271,6 +301,7 @@ Wasn't it good?";
    and the nested list ended</li>
  <li>But then a third item followed</li>
 </ol>
-Wasn't it good?");
+Wasn't it good?",
+    );
     assert_eq!(expected, result);
 }
